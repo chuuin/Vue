@@ -1,8 +1,11 @@
-import { expect, test } from '@playwright/test'
+﻿import { expect, test } from '@playwright/test'
 
 test('create a task from the board', async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await page.evaluate(() => {
+    localStorage.clear()
+    localStorage.setItem('kanban-flow.locale', 'en')
+  })
   await page.reload()
 
   await page.getByRole('button', { name: /new task/i }).click()

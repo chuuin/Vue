@@ -1,21 +1,23 @@
-<template>
+﻿<template>
   <Teleport to="body">
-    <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center p-6">
-      <div class="absolute inset-0 bg-slate-950/70" @click="close" />
+    <div
+      v-if="open"
+      class="fixed inset-0 z-50 flex items-center justify-center p-6"
+    >
+      <div
+        class="absolute inset-0 bg-slate-950/70"
+        @click="close"
+      />
       <div
         class="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-slate-900/90 p-6 shadow-2xl backdrop-blur"
       >
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 class="font-display text-xl font-semibold text-white">
-              {{ isEditing ? 'Edit task' : 'Create a task' }}
+              {{ isEditing ? t('modal.editTitle') : t('modal.createTitle') }}
             </h3>
             <p class="text-sm text-slate-300">
-              {{
-                isEditing
-                  ? 'Update details and keep momentum.'
-                  : 'Capture a task with clear intent.'
-              }}
+              {{ isEditing ? t('modal.editSubtitle') : t('modal.createSubtitle') }}
             </p>
           </div>
           <button
@@ -23,86 +25,122 @@
             type="button"
             @click="close"
           >
-            Close
+            {{ t('action.close') }}
           </button>
         </div>
 
-        <form class="mt-6 grid gap-4" @submit.prevent="handleSubmit">
+        <form
+          class="mt-6 grid gap-4"
+          @submit.prevent="handleSubmit"
+        >
           <div>
-            <label class="text-xs uppercase tracking-wide text-slate-300" for="task-title"
-              >Title</label
+            <label
+              class="text-xs uppercase tracking-wide text-slate-300"
+              for="task-title"
             >
+              {{ t('form.title') }}
+            </label>
             <input
               id="task-title"
               v-model="form.title"
               class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-brand-500/50 focus:outline-none"
-              placeholder="What needs to be done?"
+              :placeholder="t('form.titlePlaceholder')"
               type="text"
-            />
-            <p v-if="errors.title" class="mt-1 text-xs text-rose-200">
+            >
+            <p
+              v-if="errors.title"
+              class="mt-1 text-xs text-rose-200"
+            >
               {{ errors.title }}
             </p>
           </div>
 
           <div>
-            <label class="text-xs uppercase tracking-wide text-slate-300" for="task-description"
-              >Description</label
+            <label
+              class="text-xs uppercase tracking-wide text-slate-300"
+              for="task-description"
             >
+              {{ t('form.description') }}
+            </label>
             <textarea
               id="task-description"
               v-model="form.description"
               class="mt-2 min-h-[120px] w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-brand-500/50 focus:outline-none"
-              placeholder="Add context or next steps"
+              :placeholder="t('form.descriptionPlaceholder')"
             />
-            <p v-if="errors.description" class="mt-1 text-xs text-rose-200">
+            <p
+              v-if="errors.description"
+              class="mt-1 text-xs text-rose-200"
+            >
               {{ errors.description }}
             </p>
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="text-xs uppercase tracking-wide text-slate-300" for="task-priority"
-                >Priority</label
+              <label
+                class="text-xs uppercase tracking-wide text-slate-300"
+                for="task-priority"
               >
+                {{ t('form.priority') }}
+              </label>
               <select
                 id="task-priority"
                 v-model="form.priority"
                 class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-brand-500/50 focus:outline-none"
               >
-                <option v-for="level in priorityOptions" :key="level" :value="level">
-                  {{ level }}
+                <option
+                  v-for="option in priorityOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
                 </option>
               </select>
             </div>
             <div>
-              <label class="text-xs uppercase tracking-wide text-slate-300" for="task-due"
-                >Due date</label
+              <label
+                class="text-xs uppercase tracking-wide text-slate-300"
+                for="task-due"
               >
+                {{ t('form.dueDate') }}
+              </label>
               <input
                 id="task-due"
                 v-model="form.dueDate"
                 class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-brand-500/50 focus:outline-none"
                 type="date"
-              />
-              <p v-if="errors.dueDate" class="mt-1 text-xs text-rose-200">
+              >
+              <p
+                v-if="errors.dueDate"
+                class="mt-1 text-xs text-rose-200"
+              >
                 {{ errors.dueDate }}
               </p>
             </div>
           </div>
 
           <div>
-            <label class="text-xs uppercase tracking-wide text-slate-300" for="task-tags"
-              >Tags</label
+            <label
+              class="text-xs uppercase tracking-wide text-slate-300"
+              for="task-tags"
             >
+              {{ t('form.tags') }}
+            </label>
             <input
               id="task-tags"
               v-model="form.tags"
               class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-brand-500/50 focus:outline-none"
-              placeholder="design, api, urgent"
+              :placeholder="t('form.tagsPlaceholder')"
               type="text"
-            />
-            <p class="mt-1 text-xs text-slate-400">Separate with commas. Up to 6 tags.</p>
-            <p v-if="errors.tags" class="mt-1 text-xs text-rose-200">
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              {{ t('form.tagsHint') }}
+            </p>
+            <p
+              v-if="errors.tags"
+              class="mt-1 text-xs text-rose-200"
+            >
               {{ errors.tags }}
             </p>
           </div>
@@ -113,13 +151,13 @@
               type="button"
               @click="close"
             >
-              Cancel
+              {{ t('action.cancel') }}
             </button>
             <button
               class="rounded-full bg-brand-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-brand-400"
               type="submit"
             >
-              {{ isEditing ? 'Save changes' : 'Create task' }}
+              {{ isEditing ? t('form.save') : t('form.create') }}
             </button>
           </div>
         </form>
@@ -131,6 +169,7 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
 
+import { useI18n } from '@/composables/useI18n'
 import type { Task, TaskInput, TaskPriority } from '../model/task'
 import { taskInputSchema, taskPriorityValues } from '../model/task'
 import { normalizeTags } from '../utils/filters'
@@ -141,7 +180,14 @@ const emit = defineEmits<{
   (event: 'submit', value: TaskInput): void
 }>()
 
-const priorityOptions = taskPriorityValues as TaskPriority[]
+const { t } = useI18n()
+
+const priorityOptions = computed(() =>
+  taskPriorityValues.map((value) => ({
+    value,
+    label: t(`priority.${value}`)
+  }))
+)
 
 const emptyForm = () => ({
   title: '',

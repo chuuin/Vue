@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pointer-events-none fixed right-6 top-6 z-50 flex w-72 flex-col gap-3">
     <TransitionGroup name="toast">
       <div
@@ -16,7 +16,7 @@
             type="button"
             @click="removeToast(toast.id)"
           >
-            Close
+            {{ t('action.close') }}
           </button>
         </div>
       </div>
@@ -25,9 +25,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '@/composables/useI18n'
 import { useToast, type ToastType } from '@/composables/useToast'
 
 const { toasts, removeToast } = useToast()
+const { t } = useI18n()
 
 const toastClass = (type: ToastType) => {
   if (type === 'success') {

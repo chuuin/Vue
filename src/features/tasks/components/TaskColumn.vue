@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section
     class="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-900/40 p-4 shadow-lg"
     :class="isDragOver ? 'border-brand-500/50 bg-brand-500/5' : ''"
@@ -28,7 +28,7 @@
         v-if="tasks.length === 0"
         class="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-slate-400"
       >
-        Drop a task here or create a new one.
+        {{ t('board.emptyColumn') }}
       </div>
     </div>
   </section>
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import { useI18n } from '@/composables/useI18n'
 import type { Task, TaskStatus } from '../model/task'
 import TaskCard from './TaskCard.vue'
 
@@ -46,6 +47,8 @@ const emit = defineEmits<{
   (event: 'remove', id: string): void
   (event: 'move', payload: { id: string; status: TaskStatus }): void
 }>()
+
+const { t } = useI18n()
 
 const isDragOver = ref(false)
 

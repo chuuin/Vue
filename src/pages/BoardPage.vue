@@ -1,10 +1,12 @@
-<template>
+﻿<template>
   <section class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="font-display text-2xl font-semibold text-white">Kanban board</h1>
+        <h1 class="font-display text-2xl font-semibold text-white">
+          {{ t('board.title') }}
+        </h1>
         <p class="text-sm text-slate-300">
-          Track the work that matters. Drag tasks to keep momentum.
+          {{ t('board.subtitle') }}
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -13,14 +15,14 @@
           type="button"
           @click="clearFilters"
         >
-          Reset filters
+          {{ t('board.resetFilters') }}
         </button>
         <button
           class="rounded-full bg-brand-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-brand-400"
           type="button"
           @click="openCreate"
         >
-          New task
+          {{ t('board.newTask') }}
         </button>
       </div>
     </div>
@@ -36,10 +38,15 @@
       v-if="!store.hydrated"
       class="rounded-3xl border border-white/10 bg-white/5 p-10 text-center"
     >
-      <p class="text-sm text-slate-300">Loading your board...</p>
+      <p class="text-sm text-slate-300">
+        {{ t('board.loading') }}
+      </p>
     </div>
 
-    <div v-else class="grid gap-6 lg:grid-cols-3">
+    <div
+      v-else
+      class="grid gap-6 lg:grid-cols-3"
+    >
       <TaskColumn
         v-for="(column, index) in columns"
         :key="column.status"
@@ -54,7 +61,11 @@
       />
     </div>
 
-    <TaskFormModal v-model:open="isModalOpen" :task="editingTask" @submit="handleSubmit" />
+    <TaskFormModal
+      v-model:open="isModalOpen"
+      :task="editingTask"
+      @submit="handleSubmit"
+    />
   </section>
 </template>
 
@@ -62,6 +73,7 @@
 import { computed, ref } from 'vue'
 
 import { useFilters } from '@/composables/useFilters'
+import { useI18n } from '@/composables/useI18n'
 import { useTasks } from '@/composables/useTasks'
 import { useToast } from '@/composables/useToast'
 import TaskColumn from '@/features/tasks/components/TaskColumn.vue'
@@ -72,6 +84,7 @@ import { applyTaskFilters } from '@/features/tasks/utils/filters'
 
 const { store } = useTasks()
 const { pushToast } = useToast()
+const { t } = useI18n()
 
 const { filters, availableTags, clearFilters, activeCount } = useFilters(() => store.tasks)
 
@@ -83,11 +96,13 @@ const tasksByStatus = computed(() => ({
   done: filteredTasks.value.filter((task) => task.status === 'done')
 }))
 
-const columns: { title: string; status: TaskStatus }[] = [
-  { title: 'Todo', status: 'todo' },
-  { title: 'Doing', status: 'doing' },
-  { title: 'Done', status: 'done' }
-]
+const statusLabel = (status: TaskStatus) => t(`status.${status}`)
+
+const columns = computed(() => [
+  { title: statusLabel('todo'), status: 'todo' },
+  { title: statusLabel('doing'), status: 'doing' },
+  { title: statusLabel('done'), status: 'done' }
+])
 
 const isModalOpen = ref(false)
 const editingTask = ref<Task | null>(null)
@@ -106,7 +121,7 @@ const handleSubmit = (input: TaskInput) => {
   if (editingTask.value) {
     const updated = store.updateTask(editingTask.value.id, input)
     if (updated) {
-      pushToast('Task updated', 'success')
+      pushToast(t('board.toast.updated'), 'success')
     }
     return
   }
@@ -116,20 +131,20 @@ const handleSubmit = (input: TaskInput) => {
     status: 'todo'
   }
   store.addTask(draft)
-  pushToast('Task created', 'success')
+  pushToast(t('board.toast.created'), 'success')
 }
 
 const removeTask = (id: string) => {
-  const confirmed = window.confirm('Delete this task?')
+  const confirmed = window.confirm(t('board.confirmDelete'))
   if (!confirmed) return
   store.removeTask(id)
-  pushToast('Task deleted', 'info')
+  pushToast(t('board.toast.deleted'), 'info')
 }
 
 const moveTask = ({ id, status }: { id: string; status: TaskStatus }) => {
   const moved = store.moveTask(id, status)
   if (moved) {
-    pushToast(`Moved to ${status}`, 'info')
+    pushToast(t('board.toast.moved', { status: statusLabel(status) }), 'info')
   }
 }
 </script>

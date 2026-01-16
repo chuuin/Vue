@@ -1,27 +1,34 @@
-<template>
+﻿<template>
   <section class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
     <div class="flex flex-wrap items-center gap-3">
       <div class="flex-1 min-w-[200px]">
-        <label class="text-xs uppercase tracking-wide text-slate-300">Search</label>
+        <label class="text-xs uppercase tracking-wide text-slate-300">{{
+          t('filters.search')
+        }}</label>
         <input
           class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white focus:border-brand-500/50 focus:outline-none"
           :value="modelValue.query"
-          placeholder="Title, description, or tag"
+          :placeholder="t('filters.searchPlaceholder')"
           type="text"
           @input="updateQuery"
-        />
+        >
       </div>
       <div class="min-w-[160px]">
-        <label class="text-xs uppercase tracking-wide text-slate-300">Priority</label>
+        <label class="text-xs uppercase tracking-wide text-slate-300">{{
+          t('filters.priority')
+        }}</label>
         <select
           class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white focus:border-brand-500/50 focus:outline-none"
           :value="modelValue.priority"
           @change="updatePriority"
         >
-          <option value="all">All</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option
+            v-for="option in priorityOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
         </select>
       </div>
       <div class="ml-auto flex items-end gap-2">
@@ -30,13 +37,13 @@
           type="button"
           @click="emit('clear')"
         >
-          Clear ({{ activeCount }})
+          {{ t('filters.clear', { count: activeCount }) }}
         </button>
       </div>
     </div>
 
     <div class="mt-4 flex flex-wrap items-center gap-2">
-      <span class="text-xs uppercase tracking-wide text-slate-400">Tags</span>
+      <span class="text-xs uppercase tracking-wide text-slate-400">{{ t('filters.tags') }}</span>
       <button
         v-for="tag in availableTags"
         :key="tag"
@@ -47,12 +54,20 @@
       >
         {{ tag }}
       </button>
-      <span v-if="availableTags.length === 0" class="text-xs text-slate-400"> No tags yet </span>
+      <span
+        v-if="availableTags.length === 0"
+        class="text-xs text-slate-400"
+      >
+        {{ t('filters.noTags') }}
+      </span>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
+import { useI18n } from '@/composables/useI18n'
 import type { TaskFilters } from '../utils/filters'
 
 const props = defineProps<{
@@ -64,6 +79,15 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: TaskFilters): void
   (event: 'clear'): void
 }>()
+
+const { t } = useI18n()
+
+const priorityOptions = computed(() => [
+  { value: 'all', label: t('filters.priorityAll') },
+  { value: 'low', label: t('filters.priorityLow') },
+  { value: 'medium', label: t('filters.priorityMedium') },
+  { value: 'high', label: t('filters.priorityHigh') }
+])
 
 const updateQuery = (event: Event) => {
   const target = event.target as HTMLInputElement

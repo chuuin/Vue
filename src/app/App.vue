@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="relative min-h-screen overflow-hidden">
     <div class="pointer-events-none absolute inset-0">
       <div class="absolute -top-32 right-0 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl" />
@@ -25,15 +25,17 @@ import { watch } from 'vue'
 
 import AppHeader from '@/components/AppHeader.vue'
 import ToastStack from '@/components/ToastStack.vue'
+import { useI18n } from '@/composables/useI18n'
 import { usePersist } from '@/composables/usePersist'
 import { useToast } from '@/composables/useToast'
 
-const { error } = usePersist()
+const { errorKey } = usePersist()
 const { pushToast } = useToast()
+const { t } = useI18n()
 
-watch(error, (message) => {
-  if (message) {
-    pushToast(message, 'error')
+watch(errorKey, (key) => {
+  if (key) {
+    pushToast(t(key), 'error')
   }
 })
 </script>

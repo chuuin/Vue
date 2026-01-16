@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <header class="mx-auto w-full max-w-6xl px-6 pt-8 sm:px-10">
     <div
       class="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur"
@@ -12,10 +12,10 @@
           </div>
           <div>
             <p class="font-display text-xl font-semibold text-white">
-              Kanban Flow
+              {{ t('app.name') }}
             </p>
             <p class="text-sm text-slate-300">
-              Ship tasks with clarity and momentum.
+              {{ t('app.tagline') }}
             </p>
           </div>
         </div>
@@ -23,12 +23,12 @@
           <span
             class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200"
           >
-            Local-first
+            {{ t('badge.local') }}
           </span>
           <span
             class="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs text-brand-100"
           >
-            Vue 3 + TS
+            {{ t('badge.tech') }}
           </span>
         </div>
       </div>
@@ -40,7 +40,7 @@
           class="rounded-full px-4 py-2 transition"
           :class="linkClass(link.to)"
         >
-          {{ link.label }}
+          {{ t(link.labelKey) }}
         </RouterLink>
       </nav>
     </div>
@@ -51,12 +51,16 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { useI18n } from '@/composables/useI18n'
+
 const route = useRoute()
+const { t } = useI18n()
 
 const links = [
-  { label: 'Board', to: '/' },
-  { label: 'Insights', to: '/insights' },
-  { label: 'Settings', to: '/settings' }
+  { labelKey: 'nav.board', to: '/' },
+  { labelKey: 'nav.insights', to: '/insights' },
+  { labelKey: 'nav.guide', to: '/guide' },
+  { labelKey: 'nav.settings', to: '/settings' }
 ]
 
 const currentPath = computed(() => route.path)

@@ -1,62 +1,66 @@
-# Kanban Flow
+﻿# Kanban Flow
 
-�@�ӥΩ󭱸ծi�ܪ� Kanban ���Ⱥ޲z�@�~�A�j�եi���@�B�i�X�R�P�������סC�M�ץH Vue 3 + TypeScript + Vite �غc�A��Ƨ��㪺���A�޲z�B�������ҡB�즲�B���ջP CI �y�{�C
+一個用於面試展示的 Kanban 任務管理作品，強調可維護、可擴充與高完成度。專案以 Vue 3 + TypeScript + Vite 建構，具備完整的狀態管理、表單驗證、拖曳、測試與 CI 流程。
 
-## �@�~�ؼ�
+## 作品目標
 
-- �i�{�e�ݤu�{��O�G�[�c�M���B���O�Y��B�޿�i���աC
-- �i�{���~�����סG�ݪO���� UX�B�z��B�즲�B�q���P���A���ܡC
-- �i�������p�G�䴩 GitHub Pages / Vercel�C
+- 展現前端工程能力：架構清晰、型別嚴格、邏輯可測試。
+- 展現產品完成度：看板完整 UX、篩選、拖曳、通知與狀態提示。
+- 可直接部署：支援 GitHub Pages / Vercel。
 
-## �\��C��
+## 功能列表
 
-- Kanban ���GTodo / Doing / Done
-- ���� CRUD�G�s�W�B�s��B�R��
-- �즲���ʥ��ȡ]�t�����^
-- �����ݩʡG���D�B�y�z�B���ҡB�u���šB�I����
-- �j�M�P�z��G����r�B�u���šB����
-- LocalStorage ���[��
-- �� UX�G�Ū��A�BToast�B���J���A�B���~����
+- Kanban 欄位：Todo / Doing / Done
+- 任務 CRUD：新增、編輯、刪除
+- 拖曳移動任務（含跨欄位）
+- 任務屬性：標題、描述、標籤、優先級、截止日期
+- 搜尋與篩選：關鍵字、優先級、標籤
+- LocalStorage 持久化
+- 基本 UX：空狀態、Toast、載入狀態、錯誤提示
+- 語言切換（中文 / English / 日本語）
+- 操作說明頁面（Guide）
 
-### �I��
+### 截圖
 
-- �ݪO�D���G`docs/screenshots/board.png`
-- �z��P�j�M�G`docs/screenshots/filters.png`
-- �s�W/�s����ȡG`docs/screenshots/modal.png`
+- 看板主頁：`docs/screenshots/board.png`
+- 篩選與搜尋：`docs/screenshots/filters.png`
+- 新增/編輯任務：`docs/screenshots/modal.png`
+- 操作說明：`docs/screenshots/guide.png`
 
-## �޳N�﫬�P�z��
+## 技術選型與理由
 
-- Vue 3 + TypeScript + Vite�G�ݨ�į�P�Y�櫬�O�C
-- Pinia�G�������A�޲z�A�޿�M���C
-- Vue Router�G�h���i�ܻP�����C
-- TailwindCSS�G�ֳt�Ӥ@�P�� UI �]�p�C
-- Zod�G�����J���ҡB�i�X�R�C
-- Vitest�G�֤��޿�i���աC
-- Playwright�G�̤p E2E �y�{���ҡC
-- ESLint + Prettier + Husky + lint-staged�G�����@�P�~��C
-- GitHub Actions�Gpush �ɦ۰� lint + test�C
+- Vue 3 + TypeScript + Vite：兼具效能與嚴格型別。
+- Pinia：集中狀態管理，邏輯清晰。
+- Vue Router：多頁展示與導覽。
+- TailwindCSS：快速而一致的 UI 設計。
+- Zod：表單輸入驗證、可擴充。
+- Vitest：核心邏輯可測試。
+- Playwright：最小 E2E 流程驗證。
+- ESLint + Prettier + Husky + lint-staged：維持一致品質。
+- GitHub Actions：push 時自動 lint + test。
 
-## �M�׬[�c
+## 專案架構
 
 ```
 src/
   app/                # App shell
-  components/         # �@�� UI
-  composables/        # useTasks / useFilters / usePersist
+  components/         # 共用 UI
+  composables/        # useTasks / useFilters / usePersist / useI18n
   features/
     tasks/            # domain + store + components
-  pages/              # Board / Insights / Settings
-  router/             # ���ѳ]�w
-  styles/             # Tailwind �P��¦�˦�
+  pages/              # Board / Insights / Guide / Settings
+  router/             # 路由設定
+  styles/             # Tailwind 與基礎樣式
 ```
 
-### �֤߳]�p
+### 核心設計
 
-- ���ȼҫ������� `src/features/tasks/model/task.ts`�A���O�P���ҲΤ@�C
-- �z���޿��� `src/features/tasks/utils/filters.ts`�A�䴩�椸���աC
-- LocalStorage ���[�ƥ� `src/composables/usePersist.ts` �޲z�C
+- 任務模型集中於 `src/features/tasks/model/task.ts`，型別與驗證統一。
+- 篩選邏輯抽至 `src/features/tasks/utils/filters.ts`，支援單元測試。
+- LocalStorage 持久化由 `src/composables/usePersist.ts` 管理。
+- 語言切換由 `src/composables/useI18n.ts` 提供並保存偏好。
 
-## �}�o���O
+## 開發指令
 
 ```bash
 npm install
@@ -68,7 +72,7 @@ npm run build
 npm run preview
 ```
 
-### ����
+### 測試
 
 ```bash
 npm run test
@@ -86,18 +90,18 @@ npm run lint
 npm run format
 ```
 
-## ���p
+## 部署
 
 ### GitHub Pages
 
-1. �]�w base path�]�Ч令�A�� repo �W�١^�G
+1. 設定 base path（請改成你的 repo 名稱）：
 
 ```bash
 # PowerShell
 $env:VITE_BASE='/your-repo/'; npm run deploy
 ```
 
-2. GitHub Pages �]�w�� `gh-pages` ����C
+2. GitHub Pages 設定為 `gh-pages` 分支。
 
 ### Vercel
 
@@ -105,16 +109,16 @@ $env:VITE_BASE='/your-repo/'; npm run deploy
 npm run build
 ```
 
-�����b Vercel �s�� repo ��Y�i���p�C
+直接在 Vercel 連結 repo 後即可部署。
 
 ## CI
 
-- GitHub Actions �b push �ɦ۰ʰ��� `npm run lint` �P `npm run test`�C
+- GitHub Actions 在 push 時自動執行 `npm run lint` 與 `npm run test`。
 
-## ���ӥi�X�R��V
+## 未來可擴充方向
 
 - Undo / Redo
-- �妸�ާ@�]�h��R��/���ʡ^
-- �`��Ҧ�����
-- ��L�ֱ���
-- �i���έp�P��������
+- 批次操作（多選刪除/移動）
+- 深色模式切換
+- 鍵盤快捷鍵
+- 進階統計與報表頁面

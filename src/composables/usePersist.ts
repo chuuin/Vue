@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+﻿import { ref, watch } from 'vue'
 
 import { taskListSchema } from '@/features/tasks/model/task'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
@@ -7,7 +7,7 @@ const STORAGE_KEY = 'kanban-flow.tasks.v1'
 
 export const usePersist = () => {
   const store = useTasksStore()
-  const error = ref<string | null>(null)
+  const errorKey = ref<string | null>(null)
 
   if (!store.hydrated) {
     try {
@@ -18,11 +18,11 @@ export const usePersist = () => {
         if (result.success) {
           store.hydrate(result.data)
         } else {
-          error.value = 'Saved data was corrupted. Starting with a clean board.'
+          errorKey.value = 'persist.corrupt'
         }
       }
     } catch (err) {
-      error.value = 'Unable to read saved tasks. Your board may reset.'
+      errorKey.value = 'persist.unreadable'
     } finally {
       store.setHydrated(true)
     }
@@ -38,6 +38,6 @@ export const usePersist = () => {
   )
 
   return {
-    error
+    errorKey
   }
 }
