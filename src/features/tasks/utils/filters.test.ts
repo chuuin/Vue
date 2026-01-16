@@ -1,8 +1,14 @@
+﻿/**
+ * 檔案用途：filters 工具的單元測試，確保搜尋/標籤邏輯正確。
+ * 依賴：Vitest、filters 工具與 Task 型別。
+ * 輸入/輸出：輸入假資料，驗證輸出陣列結果。
+ */
 import { describe, expect, it } from 'vitest'
 
 import type { Task } from '../model/task'
 import { applyTaskFilters, extractTags, normalizeTags } from './filters'
 
+// 測試用任務工廠：讓案例更容易閱讀與維護
 const baseTask = (overrides: Partial<Task>): Task => ({
   id: 'task-1',
   title: 'Design system',

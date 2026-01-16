@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：看板欄位容器，顯示任務清單並處理拖曳落點。
+  依賴：TaskCard、useI18n、HTML Drag & Drop API。
+  輸入/輸出：props: title/status/tasks；emits: edit/remove/move。
+-->
+<template>
   <section
     class="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-900/40 p-4 shadow-lg"
     :class="isDragOver ? 'border-brand-500/50 bg-brand-500/5' : ''"
@@ -35,6 +40,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * props：
+ * - title：欄位標題（已翻譯）
+ * - status：欄位狀態（todo/doing/done）
+ * - tasks：此欄位的任務清單
+ * emits：
+ * - edit(task)：編輯任務
+ * - remove(id)：刪除任務
+ * - move({ id, status })：拖曳到此欄位時更新狀態
+ */
 import { ref } from 'vue'
 
 import { useI18n } from '@/composables/useI18n'
@@ -50,6 +65,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// reactive：控制拖曳 hover 樣式
 const isDragOver = ref(false)
 
 const onDragOver = () => {
@@ -60,6 +76,15 @@ const onDragLeave = () => {
   isDragOver.value = false
 }
 
+/*
+ * 複雜邏輯：Drop 處理
+ * 動機：將拖曳任務更新到目前欄位狀態。
+ * 流程：
+ * 1) 從 dataTransfer 讀取任務 id
+ * 2) emit move 讓父層更新 store
+ * 3) 關閉拖曳樣式
+ * 例外：沒有 id 時直接返回（避免錯誤更新）
+ */
 const onDrop = (event: DragEvent) => {
   event.preventDefault()
   const id = event.dataTransfer?.getData('text/plain')

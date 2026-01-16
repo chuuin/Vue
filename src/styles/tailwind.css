@@ -1,3 +1,8 @@
+﻿/*
+ * 檔案用途：Tailwind 入口與全站基礎樣式。
+ * 依賴：Tailwind 指令、Google Fonts。
+ * 輸入/輸出：無輸入；副作用為注入全域樣式。
+ */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;

@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：提供任務統計與即將到期清單。
+  依賴：useTasks、useI18n。
+  輸入/輸出：無 props/emits；輸出計算後的統計結果。
+-->
+<template>
   <section class="space-y-6">
     <div>
       <h1 class="font-display text-2xl font-semibold text-white">
@@ -90,6 +95,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 本頁無 props/emits。
+ * 使用 computed 聚合統計數據，避免重複計算。
+ */
 import { computed } from 'vue'
 
 import { useI18n } from '@/composables/useI18n'
@@ -108,6 +117,10 @@ const priority = computed(() => ({
   low: store.tasks.filter((task) => task.priority === 'low').length
 }))
 
+/*
+ * computed：挑出 7 天內到期的任務
+ * - 只顯示前 5 筆，避免清單過長
+ */
 const dueSoon = computed(() => {
   const now = new Date()
   const inSevenDays = new Date()

@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：設定頁，提供匯入/匯出、清空、語言切換與專案說明。
+  依賴：useTasksStore、useToast、useI18n、taskListSchema。
+  輸入/輸出：無 props/emits；透過 store 寫入/讀取資料並顯示 toast。
+-->
+<template>
   <section class="space-y-6">
     <div>
       <h1 class="font-display text-2xl font-semibold text-white">
@@ -87,6 +92,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 本頁無 props/emits。
+ * method 皆為使用者操作入口（匯入/匯出/清空/語言切換）。
+ */
 import { useI18n } from '@/composables/useI18n'
 import { useToast } from '@/composables/useToast'
 import { taskListSchema } from '@/features/tasks/model/task'
@@ -96,6 +105,10 @@ const store = useTasksStore()
 const { pushToast } = useToast()
 const { locale, availableLocales, t } = useI18n()
 
+/*
+ * method：匯出任務
+ * - 建立 Blob 並觸發下載
+ */
 const exportTasks = () => {
   const blob = new Blob([JSON.stringify(store.tasks, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -107,6 +120,15 @@ const exportTasks = () => {
   pushToast(t('settings.toast.export'), 'success')
 }
 
+/*
+ * 複雜邏輯：匯入任務
+ * 動機：允許使用者復原或搬移任務資料。
+ * 流程：
+ * 1) 讀取檔案內容
+ * 2) JSON parse 後用 Zod 驗證
+ * 3) 成功則 hydrate store，失敗則顯示錯誤
+ * 例外：解析失敗時顯示錯誤 toast。
+ */
 const importTasks = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
@@ -129,6 +151,7 @@ const importTasks = async (event: Event) => {
   }
 }
 
+// method：清空看板（有確認對話框）
 const clearBoard = () => {
   const confirmed = window.confirm(t('settings.confirmClear'))
   if (!confirmed) return

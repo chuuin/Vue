@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：主看板頁，整合搜尋、欄位、任務 CRUD 與拖曳。
+  依賴：useTasks/useFilters/useToast/useI18n、TaskColumn、TaskFormModal。
+  輸入/輸出：無 props/emits；透過 store 讀寫資料並觸發 toast。
+-->
+<template>
   <section class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
@@ -70,6 +75,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 這個頁面不接受 props/emits。
+ * 透過 composables 與 Pinia store 讀寫任務資料。
+ */
 import { computed, ref } from 'vue'
 
 import { useFilters } from '@/composables/useFilters'
@@ -88,8 +97,10 @@ const { t } = useI18n()
 
 const { filters, availableTags, clearFilters, activeCount } = useFilters(() => store.tasks)
 
+// computed：套用篩選條件後的任務清單
 const filteredTasks = computed(() => applyTaskFilters(store.tasks, filters.value))
 
+// computed：依狀態分組供欄位顯示
 const tasksByStatus = computed(() => ({
   todo: filteredTasks.value.filter((task) => task.status === 'todo'),
   doing: filteredTasks.value.filter((task) => task.status === 'doing'),
@@ -98,6 +109,7 @@ const tasksByStatus = computed(() => ({
 
 const statusLabel = (status: TaskStatus) => t(`status.${status}`)
 
+// computed：欄位設定（標題會依語系更新）
 const columns = computed(() => [
   { title: statusLabel('todo'), status: 'todo' },
   { title: statusLabel('doing'), status: 'doing' },
@@ -107,16 +119,19 @@ const columns = computed(() => [
 const isModalOpen = ref(false)
 const editingTask = ref<Task | null>(null)
 
+// method：開啟新增模式
 const openCreate = () => {
   editingTask.value = null
   isModalOpen.value = true
 }
 
+// method：開啟編輯模式
 const openEdit = (task: Task) => {
   editingTask.value = task
   isModalOpen.value = true
 }
 
+// method：表單送出後寫入 store，並提示通知
 const handleSubmit = (input: TaskInput) => {
   if (editingTask.value) {
     const updated = store.updateTask(editingTask.value.id, input)
@@ -134,6 +149,7 @@ const handleSubmit = (input: TaskInput) => {
   pushToast(t('board.toast.created'), 'success')
 }
 
+// method：刪除任務（有確認對話框）
 const removeTask = (id: string) => {
   const confirmed = window.confirm(t('board.confirmDelete'))
   if (!confirmed) return
@@ -141,6 +157,7 @@ const removeTask = (id: string) => {
   pushToast(t('board.toast.deleted'), 'info')
 }
 
+// method：拖曳變更狀態（只有真的變動才顯示 toast）
 const moveTask = ({ id, status }: { id: string; status: TaskStatus }) => {
   const moved = store.moveTask(id, status)
   if (moved) {

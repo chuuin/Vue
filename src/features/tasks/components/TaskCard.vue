@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：顯示單張任務卡，支援拖曳與編輯/刪除動作。
+  依賴：useI18n、Task 型別、HTML Drag & Drop API。
+  輸入/輸出：props: task；emits: edit/remove；副作用：設定 drag data。
+-->
+<template>
   <article
     class="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg backdrop-blur transition hover:border-brand-500/40"
     draggable="true"
@@ -68,6 +73,13 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * props：
+ * - task：單一任務資料（包含標題、狀態、截止日等）。
+ * emits：
+ * - edit(task)：點擊編輯時觸發
+ * - remove(id)：點擊刪除時觸發
+ */
 import { computed } from 'vue'
 
 import { useI18n } from '@/composables/useI18n'
@@ -81,6 +93,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// method：依優先級給予顏色提示
 const priorityClass = (priority: TaskPriority) => {
   if (priority === 'high') return 'bg-rose-500/20 text-rose-100'
   if (priority === 'medium') return 'bg-amber-400/20 text-amber-100'
@@ -89,11 +102,13 @@ const priorityClass = (priority: TaskPriority) => {
 
 const priorityLabel = (priority: TaskPriority) => t(`priority.${priority}`)
 
+// computed：顯示截止日期文字
 const dueLabel = computed(() => {
   if (!props.task.dueDate) return t('task.noDue')
   return t('task.due', { date: props.task.dueDate })
 })
 
+// computed：判斷是否已逾期，用來提示紅色樣式
 const isOverdue = computed(() => {
   if (!props.task.dueDate) return false
   const now = new Date()
@@ -101,6 +116,11 @@ const isOverdue = computed(() => {
   return due.getTime() < now.getTime()
 })
 
+/*
+ * method：拖曳開始時寫入資料
+ * - 使用 dataTransfer 傳遞 id 與狀態
+ * - 讓欄位在 drop 時可正確更新
+ */
 const onDragStart = (event: DragEvent) => {
   event.dataTransfer?.setData('text/plain', props.task.id)
   event.dataTransfer?.setData('application/x-kanban-status', props.task.status)

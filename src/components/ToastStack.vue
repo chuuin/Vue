@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：全域 Toast 區塊，顯示短暫通知訊息。
+  依賴：useToast、useI18n、TransitionGroup。
+  輸入/輸出：無 props/emits；透過 composable 讀取 toasts 並可關閉。
+-->
+<template>
   <div class="pointer-events-none fixed right-6 top-6 z-50 flex w-72 flex-col gap-3">
     <TransitionGroup name="toast">
       <div
@@ -25,12 +30,17 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 這個元件不接受 props/emits。
+ * 使用 `useToast` 提供的 reactive list 來顯示訊息。
+ */
 import { useI18n } from '@/composables/useI18n'
 import { useToast, type ToastType } from '@/composables/useToast'
 
 const { toasts, removeToast } = useToast()
 const { t } = useI18n()
 
+// method：依通知類型決定顏色，方便快速辨識狀態。
 const toastClass = (type: ToastType) => {
   if (type === 'success') {
     return 'border-emerald-400/40 bg-emerald-500/20'

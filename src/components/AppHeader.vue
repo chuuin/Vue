@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：頁首導覽與品牌區，提供路由切換入口。
+  依賴：Vue Router、useI18n。
+  輸入/輸出：無 props/emits；輸出為 RouterLink 列表。
+-->
+<template>
   <header class="mx-auto w-full max-w-6xl px-6 pt-8 sm:px-10">
     <div
       class="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur"
@@ -48,6 +53,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 這個元件沒有 props/emits。
+ * 主要邏輯：根據目前路由決定導覽高亮樣式。
+ */
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -56,6 +65,7 @@ import { useI18n } from '@/composables/useI18n'
 const route = useRoute()
 const { t } = useI18n()
 
+// 導覽設定：只包含 label key 與對應路徑。
 const links = [
   { labelKey: 'nav.board', to: '/' },
   { labelKey: 'nav.insights', to: '/insights' },
@@ -63,8 +73,10 @@ const links = [
   { labelKey: 'nav.settings', to: '/settings' }
 ]
 
+// computed：當路由改變時，自動更新目前路徑。
 const currentPath = computed(() => route.path)
 
+// method：依目前路徑給予不同樣式，讓使用者辨識所在頁。
 const linkClass = (path: string) => {
   if (currentPath.value === path) {
     return 'bg-white/15 text-white'

@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：任務新增/編輯的表單彈窗。
+  依賴：Zod schema、useI18n、normalizeTags。
+  輸入/輸出：props: open/task；emits: update:open/submit。
+-->
+<template>
   <Teleport to="body">
     <div
       v-if="open"
@@ -167,6 +172,14 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * props：
+ * - open：控制彈窗顯示
+ * - task：存在代表編輯模式，不存在為新增模式
+ * emits：
+ * - update:open(value)：控制彈窗開關
+ * - submit(value)：提交表單資料（已驗證）
+ */
 import { computed, reactive, watch } from 'vue'
 
 import { useI18n } from '@/composables/useI18n'
@@ -182,6 +195,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// computed：讓下拉選單顯示翻譯後的優先級文字
 const priorityOptions = computed(() =>
   taskPriorityValues.map((value) => ({
     value,
@@ -200,8 +214,10 @@ const emptyForm = () => ({
 const form = reactive(emptyForm())
 const errors = reactive<Record<string, string>>({})
 
+// computed：判斷是否為編輯模式，控制標題與按鈕文案
 const isEditing = computed(() => Boolean(props.task))
 
+// method：根據 task 或空白表單同步內容
 const syncForm = () => {
   Object.assign(form, emptyForm())
   if (props.task) {
@@ -214,6 +230,11 @@ const syncForm = () => {
   Object.keys(errors).forEach((key) => delete errors[key])
 }
 
+/*
+ * watch：
+ * - open 變成 true 時重置表單
+ * - task 變動時同步內容（編輯不同任務）
+ */
 watch(
   () => props.open,
   (value) => {
@@ -230,6 +251,15 @@ watch(
 
 const close = () => emit('update:open', false)
 
+/*
+ * 複雜邏輯：送出表單
+ * 動機：統一表單輸入、驗證與錯誤顯示。
+ * 流程：
+ * 1) 組合 TaskInput（含 tags 正規化）
+ * 2) 用 Zod 驗證，失敗就寫入錯誤訊息
+ * 3) 成功則 emit submit 並關閉彈窗
+ * 例外：驗證失敗時不送出。
+ */
 const handleSubmit = () => {
   const input: TaskInput = {
     title: form.title.trim(),

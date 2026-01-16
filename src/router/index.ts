@@ -1,4 +1,9 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+﻿/**
+ * 檔案用途：集中管理前端路由設定。
+ * 依賴：Vue Router、各頁面元件。
+ * 輸入/輸出：輸出 router 實例；輸入為路由表設定。
+ */
+import { createRouter, createWebHistory } from 'vue-router'
 
 import BoardPage from '@/pages/BoardPage.vue'
 import GuidePage from '@/pages/GuidePage.vue'

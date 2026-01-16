@@ -1,9 +1,23 @@
-﻿import { ref, watch } from 'vue'
+﻿/**
+ * 檔案用途：提供簡易 i18n（中/英/日）與語系持久化邏輯。
+ * 依賴：Vue `ref/watch`、`localStorage`、`document.documentElement.lang`。
+ * 輸入/輸出：輸出 `locale`/`availableLocales`/`t()`；副作用為寫入 localStorage 與更新 `<html lang>`。
+ */
+import { ref, watch } from 'vue'
 
 export type Locale = 'en' | 'zh' | 'ja'
 
 const STORAGE_KEY = 'kanban-flow.locale'
 
+/*
+ * 複雜邏輯：初始語系推斷
+ * 動機：優先尊重使用者設定，其次才依瀏覽器語系。
+ * 流程：
+ * 1) SSR 環境直接回傳英文，避免使用 window。
+ * 2) 檢查 localStorage 是否已有合法語系。
+ * 3) 取 navigator.language 前綴判斷 zh/ja，其餘回英文。
+ * 例外：無資料時回英文作為安全預設。
+ */
 const resolveInitialLocale = (): Locale => {
   if (typeof window === 'undefined') return 'en'
 
@@ -16,6 +30,7 @@ const resolveInitialLocale = (): Locale => {
   return 'en'
 }
 
+// 翻譯字典：以 key 對應文案，供 t() 查找
 const messages: Record<Locale, Record<string, string>> = {
   en: {
     'app.name': 'Kanban Flow',
@@ -125,7 +140,7 @@ const messages: Record<Locale, Record<string, string>> = {
     'persist.unreadable': 'Unable to read saved tasks. Your board may reset.'
   },
   zh: {
-    'app.name': '看板流程管理網頁',
+    'app.name': 'Kanban Flow',
     'app.tagline': '以清晰節奏推進任務。',
     'badge.local': '本機優先',
     'badge.tech': 'Vue 3 + TS',
@@ -231,110 +246,108 @@ const messages: Record<Locale, Record<string, string>> = {
   },
   ja: {
     'app.name': 'Kanban Flow',
-    'app.tagline': '明快なリズムでタスクを進める。',
-    'badge.local': 'ローカル優先',
+    'app.tagline': '明快?????????進??。',
+    'badge.local': '????優先',
     'badge.tech': 'Vue 3 + TS',
-    'nav.board': 'ボード',
-    'nav.insights': 'インサイト',
-    'nav.guide': '使い方',
+    'nav.board': '???',
+    'nav.insights': '?????',
+    'nav.guide': '使?方',
     'nav.settings': '設定',
-    'board.title': 'カンバンボード',
-    'board.subtitle': '重要な仕事を追跡し、ドラッグで流れを保つ。',
-    'board.resetFilters': 'フィルターをリセット',
-    'board.newTask': '新規タスク',
-    'board.loading': 'ボードを読み込み中...',
-    'board.emptyColumn': 'ここにドロップするか新規作成してください。',
-    'board.confirmDelete': 'このタスクを削除しますか？',
-    'board.toast.updated': 'タスクを更新しました',
-    'board.toast.created': 'タスクを作成しました',
-    'board.toast.deleted': 'タスクを削除しました',
-    'board.toast.moved': '「{status}」へ移動しました',
-    'filters.search': '検索',
-    'filters.searchPlaceholder': 'タイトル、説明、タグ',
+    'board.title': '???????',
+    'board.subtitle': '重要?仕事?追跡?、?????流??保?。',
+    'board.resetFilters': '??????????',
+    'board.newTask': '新規???',
+    'board.loading': '????????中...',
+    'board.emptyColumn': '??????????新規作成??????。',
+    'board.confirmDelete': '??????削除????？',
+    'board.toast.updated': '????更新????',
+    'board.toast.created': '????作成????',
+    'board.toast.deleted': '????削除????',
+    'board.toast.moved': '「{status}」?移動????',
+    'filters.search': '?索',
+    'filters.searchPlaceholder': '????、?明、??',
     'filters.priority': '優先度',
-    'filters.priorityAll': 'すべて',
+    'filters.priorityAll': '???',
     'filters.priorityLow': '低',
     'filters.priorityMedium': '中',
     'filters.priorityHigh': '高',
-    'filters.clear': 'クリア（{count}）',
-    'filters.tags': 'タグ',
-    'filters.noTags': 'タグなし',
-    'task.noTags': 'タグなし',
-    'task.noDue': '期限なし',
+    'filters.clear': '???（{count}）',
+    'filters.tags': '??',
+    'filters.noTags': '????',
+    'task.noTags': '????',
+    'task.noDue': '期限??',
     'task.due': '期限 {date}',
     'action.edit': '編集',
     'action.delete': '削除',
-    'action.close': '閉じる',
-    'action.cancel': 'キャンセル',
-    'modal.createTitle': 'タスクを作成',
-    'modal.editTitle': 'タスクを編集',
-    'modal.createSubtitle': '目的を明確にしてタスクを記録。',
-    'modal.editSubtitle': '詳細を更新して流れを維持。',
-    'form.title': 'タイトル',
-    'form.titlePlaceholder': '何をやる？',
-    'form.description': '説明',
-    'form.descriptionPlaceholder': '背景や次のステップを追加',
+    'action.close': '閉??',
+    'action.cancel': '?????',
+    'modal.createTitle': '????作成',
+    'modal.editTitle': '????編集',
+    'modal.createSubtitle': '目的?明確???????記?。',
+    'modal.editSubtitle': '詳細?更新??流??維持。',
+    'form.title': '????',
+    'form.titlePlaceholder': '何???？',
+    'form.description': '?明',
+    'form.descriptionPlaceholder': '背景?次??????追加',
     'form.priority': '優先度',
     'form.dueDate': '期限日',
-    'form.tags': 'タグ',
+    'form.tags': '??',
     'form.tagsPlaceholder': 'design, api, urgent',
-    'form.tagsHint': 'カンマ区切り、最大 6 タグ。',
-    'form.save': '変更を保存',
-    'form.create': 'タスクを作成',
-    'status.todo': '未着手',
+    'form.tagsHint': '????切?、最大 6 ??。',
+    'form.save': '?更?保存',
+    'form.create': '????作成',
+    'status.todo': '未?手',
     'status.doing': '進行中',
     'status.done': '完了',
     'priority.low': '低',
     'priority.medium': '中',
     'priority.high': '高',
-    'insights.title': 'インサイト',
-    'insights.subtitle': '作業負荷を素早く確認。',
-    'insights.total': '総タスク数',
+    'insights.title': '?????',
+    'insights.subtitle': '作業負荷?素早?確認。',
+    'insights.total': '?????',
     'insights.doing': '進行中',
     'insights.done': '完了',
-    'insights.priorityMix': '優先度の内訳',
+    'insights.priorityMix': '優先度???',
     'insights.dueSoon': '期限間近',
-    'insights.dueSoonHint': '今後 7 日以内のタスク。',
-    'insights.noDueSoon': '直近の期限はありません。',
+    'insights.dueSoonHint': '今後 7 日以?????。',
+    'insights.noDueSoon': '直近?期限??????。',
     'settings.title': '設定',
-    'settings.subtitle': 'ローカルデータと設定を管理。',
-    'settings.storageTitle': 'ストレージ',
-    'settings.storageDesc': 'タスクはブラウザに保存され、プライバシーと起動速度を確保。',
-    'settings.export': 'JSON エクスポート',
-    'settings.import': 'JSON インポート',
-    'settings.clear': 'ボードをクリア',
-    'settings.profileTitle': 'プロジェクト概要',
-    'settings.profileDesc':
-      'Pinia や composables、テスト可能なドメインロジックを備えた Vue 3 構成を紹介。',
-    'settings.profileItem1': '機能単位のフォルダ構成。',
-    'settings.profileItem2': 'ローカル優先の永続化とスキーマ検証。',
-    'settings.profileItem3': 'タスクモデルを厳格に型付け。',
-    'settings.confirmClear': 'すべてのタスクを削除しますか？元に戻せません。',
-    'settings.toast.export': 'エクスポート準備完了',
-    'settings.toast.invalid': 'タスク形式が不正です',
-    'settings.toast.imported': 'タスクをインポートしました',
-    'settings.toast.importFailed': 'ファイルをインポートできません',
-    'settings.toast.cleared': 'ボードをクリアしました',
+    'settings.subtitle': '????????設定?管理。',
+    'settings.storageTitle': '?????',
+    'settings.storageDesc': '?????????保存??、???????起動速度?確保。',
+    'settings.export': 'JSON ??????',
+    'settings.import': 'JSON ?????',
+    'settings.clear': '???????',
+    'settings.profileTitle': '??????概要',
+    'settings.profileDesc': 'Pinia ? composables、???可能??????????備?? Vue 3 構成?紹介。',
+    'settings.profileItem1': '機能?位?????構成。',
+    'settings.profileItem2': '????優先?永?化??????証。',
+    'settings.profileItem3': '????????格?型付?。',
+    'settings.confirmClear': '????????削除????？元??????。',
+    'settings.toast.export': '??????準備完了',
+    'settings.toast.invalid': '???形式?不正??',
+    'settings.toast.imported': '?????????????',
+    'settings.toast.importFailed': '???????????????',
+    'settings.toast.cleared': '???????????',
     'settings.languageTitle': '言語',
-    'settings.languageDesc': '表示言語を切り替えます。',
-    'guide.title': '使い方',
-    'guide.subtitle': 'ボード活用のクイックガイド。',
-    'guide.quickStart.title': 'クイックスタート',
-    'guide.quickStart.item1': '「新規タスク」から必要情報を入力。',
-    'guide.quickStart.item2': 'タグと優先度で重要度を可視化。',
-    'guide.drag.title': 'ドラッグ & ドロップ',
-    'guide.drag.item1': 'カードを列間でドラッグして状態を更新。',
-    'guide.drag.item2': '列がハイライトされたらドロップ可能。',
-    'guide.filters.title': '検索とフィルター',
-    'guide.filters.item1': '検索はタイトル・説明・タグを対象。',
-    'guide.filters.item2': '優先度とタグで絞り込み可能。',
-    'guide.data.title': 'データ管理',
-    'guide.data.item1': 'JSON をエクスポートしてバックアップ。',
-    'guide.data.item2': 'JSON をインポートして即復元。',
-    'guide.tip': 'ヒント：説明は簡潔にし、期限日を設定して可視化。',
-    'persist.corrupt': '保存データが破損していたためリセットしました。',
-    'persist.unreadable':
-      '保存済みタスクを読み取れませんでした。ボードがリセットされる可能性があります。'
+    'settings.languageDesc': '表示言語?切?替???。',
+    'guide.title': '使?方',
+    'guide.subtitle': '???活用????????。',
+    'guide.quickStart.title': '????????',
+    'guide.quickStart.item1': '「新規???」??必要情報?入力。',
+    'guide.quickStart.item2': '???優先度?重要度?可視化。',
+    'guide.drag.title': '???? & ????',
+    'guide.drag.item1': '????列間????????態?更新。',
+    'guide.drag.item2': '列??????????????可能。',
+    'guide.filters.title': '?索??????',
+    'guide.filters.item1': '?索???????明?????象。',
+    'guide.filters.item2': '優先度????絞???可能。',
+    'guide.data.title': '???管理',
+    'guide.data.item1': 'JSON ???????????????。',
+    'guide.data.item2': 'JSON ????????即復元。',
+    'guide.tip': '???：?明?簡潔??、期限日?設定??可視化。',
+    'persist.corrupt': '保存????破損??????????????。',
+    'persist.unreadable': '保存????????取???????。???????????可能性?????。'
   }
 }
 
@@ -344,13 +357,23 @@ const availableLocales = [
   { value: 'ja', label: '日本語' }
 ] as const
 
+// 目前語系狀態：由 Settings 內的選單切換
 const locale = ref<Locale>(resolveInitialLocale())
 
+/*
+ * 複雜邏輯：字串插值
+ * 動機：支援像 "Moved to {status}" 的動態文案。
+ * 流程：
+ * 1) 比對 `{key}`
+ * 2) 使用 params 替換
+ * 例外：參數不存在時回空字串，避免顯示 undefined。
+ */
 const interpolate = (template: string, params?: Record<string, string | number>) => {
   if (!params) return template
   return template.replace(/\{(\w+)\}/g, (_, key) => `${params[key] ?? ''}`)
 }
 
+// 取得翻譯文字：缺 key 時回英文，再回傳 key 方便除錯
 const t = (key: string, params?: Record<string, string | number>) => {
   const template = messages[locale.value][key] ?? messages.en[key] ?? key
   return interpolate(template, params)
@@ -358,6 +381,7 @@ const t = (key: string, params?: Record<string, string | number>) => {
 
 let initialized = false
 
+// 將語系同步到 HTML lang 屬性
 const applyLocale = (value: Locale) => {
   if (typeof document === 'undefined') return
 
@@ -365,9 +389,18 @@ const applyLocale = (value: Locale) => {
   document.documentElement.lang = lang
 }
 
+/**
+ * 對外 API：提供語系狀態與翻譯函式
+ * 輸出：`locale`/`availableLocales`/`t()`
+ */
 export const useI18n = () => {
   if (!initialized) {
     initialized = true
+    /*
+     * watch：語系變動時持久化並同步 HTML lang
+     * - 寫入 localStorage 讓重整後仍保留語系
+     * - 立即執行以套用初始語系
+     */
     watch(
       locale,
       (value) => {

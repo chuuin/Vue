@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：操作說明頁，提供初次使用者的導覽步驟。
+  依賴：useI18n。
+  輸入/輸出：無 props/emits；以文字引導為主。
+-->
+<template>
   <section class="space-y-6">
     <div>
       <h1 class="font-display text-2xl font-semibold text-white">
@@ -38,6 +43,10 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 本頁無 props/emits。
+ * sections 為靜態設定，方便新增或調整說明區塊。
+ */
 import { useI18n } from '@/composables/useI18n'
 
 const { t } = useI18n()

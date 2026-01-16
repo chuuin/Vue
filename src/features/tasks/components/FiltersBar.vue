@@ -1,4 +1,9 @@
-﻿<template>
+﻿<!--
+  檔案用途：搜尋與篩選 UI，讓使用者調整條件。
+  依賴：useI18n、TaskFilters 型別。
+  輸入/輸出：props: modelValue/availableTags/activeCount；emits: update:modelValue/clear。
+-->
+<template>
   <section class="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
     <div class="flex flex-wrap items-center gap-3">
       <div class="flex-1 min-w-[200px]">
@@ -65,6 +70,15 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * props：
+ * - modelValue：目前篩選狀態（v-model）
+ * - availableTags：可選標籤清單
+ * - activeCount：啟用條件數量
+ * emits：
+ * - update:modelValue(value)：更新篩選條件
+ * - clear：清空條件
+ */
 import { computed } from 'vue'
 
 import { useI18n } from '@/composables/useI18n'
@@ -82,6 +96,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// computed：依語系產生優先級選單
 const priorityOptions = computed(() => [
   { value: 'all', label: t('filters.priorityAll') },
   { value: 'low', label: t('filters.priorityLow') },
@@ -89,11 +104,13 @@ const priorityOptions = computed(() => [
   { value: 'high', label: t('filters.priorityHigh') }
 ])
 
+// method：更新關鍵字
 const updateQuery = (event: Event) => {
   const target = event.target as HTMLInputElement
   emit('update:modelValue', { ...props.modelValue, query: target.value })
 }
 
+// method：更新優先級
 const updatePriority = (event: Event) => {
   const target = event.target as HTMLSelectElement
   emit('update:modelValue', {
@@ -102,6 +119,7 @@ const updatePriority = (event: Event) => {
   })
 }
 
+// method：切換標籤選取狀態
 const toggleTag = (tag: string) => {
   const next = new Set(props.modelValue.tags)
   if (next.has(tag)) {
